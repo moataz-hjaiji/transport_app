@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import true
 
 from app.database.database import get_db
 from sqlalchemy.orm import Session
@@ -93,3 +94,30 @@ def delete_admin(admin_id: int,db: Session = Depends(get_db)):
     db.delete(db_admin)
     db.commit()
     return None
+
+@router.put("/{admin_id}/activate",response_model=AdminOut)
+def active_admin(admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter(Admin.id == admin_id).first()
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Admin with id {admin_id} not found"
+        )
+    admin.is_active = True
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    return admin
+@router.put("/{admin_id}/desactive",response_model=AdminOut)
+def active_admin(admin_id: int, db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter(Admin.id == admin_id).first()
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Admin with id {admin_id} not found"
+        )
+    admin.is_active = False
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    return admin
