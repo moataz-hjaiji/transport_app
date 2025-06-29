@@ -40,7 +40,27 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login(user: UserCreate, db: Session = Depends(get_db)):
-    # Authenticate user
+    # 1. Verify user exists and password is correct
+    db_user = authenticate_user(db, user.email, user.password)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # 2. Create token with proper claims
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token_data = {
+        "sub": str(db_user.email),  # Or use db_user.id if preferred
+        # Add any additional claims here
+    }
+    access_token = create_access_token(
+        data=token_data,
+        expires_delta=access_token_expires
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
     db_user = db.query(User).filter(User.email == user.email).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(
@@ -52,11 +72,17 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": db_user.username}, expires_delta=access_token_expires
+        data={"sub": db_user.email}, expires_delta=access_token_expires
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
-
+def authenticate_user(db: Session, email: str, password: str):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
 @router.get("/me", response_model=UserSchema, dependencies=[Depends(JWTBearer())])
 def read_current_user(db: Session = Depends(get_db), token: str = Depends(JWTBearer())):
     from app.auth.auth_handler import decode_token
