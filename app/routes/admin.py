@@ -6,25 +6,22 @@ from sqlalchemy.orm import Session
 from app.schemas.admin import AdminCreate
 from app.models.admin import Admin
 from app.schemas.admin import AdminOut,AdminUpdate
-
-from app.auth.auth_handler import get_password_hash
-from app.auth.dependencies import get_current_admin
-from app.auth.auth_handler import oauth2_scheme, decode_token
-from app.schemas.token import TokenData
+from app.auth.auth_handler import admin_only, get_password_hash
 from fastapi.security import OAuth2PasswordBearer
 
 
 router = APIRouter(
     prefix="/api/admins",
-    tags=["admins"]
+    tags=["admins"],
+    dependencies=[admin_only]
 )
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.get("/")
-def get_admins(
+async def get_admins(
     skip: int = 0, 
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
     ):
     admins = db.query(Admin).offset(skip).limit(limit).all()
     return admins

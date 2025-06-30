@@ -10,3 +10,5 @@ class Admin(Base):
     password = Column(String, nullable=False)
     avatar = Column(LargeBinary, nullable=True)  
     is_active = Column(Boolean, default=True)
+    class Config:
+        from_attributes = True

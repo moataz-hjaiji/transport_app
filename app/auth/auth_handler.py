@@ -3,10 +3,12 @@ from typing import Optional
 from pydantic import  SecretStr
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 import os
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
+from app.database.database import get_db
 from app.schemas.token import TokenData
 
 load_dotenv()
@@ -82,3 +84,24 @@ def decode_token(token: str) -> TokenData:
                 detail="Token expired",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
+async def get_current_admin(db: Session = Depends(get_db),token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    db_user = db.query(Admin).filter(Admin.id == payload.get('id')).first()
+    if db_user is None:
+        raise credentials_exception
+    
+    return db_user
+
+admin_only = Depends(get_current_admin)
