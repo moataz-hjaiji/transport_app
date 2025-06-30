@@ -47,7 +47,7 @@ class AppLogger:
         
         # Standard format with colorized levelname
         console_formatter = LevelnameColorFormatter(
-            "%(levelname)s : %(asctime)s - %(name)s  - %(message)s",
+            "%(levelname)s : %(asctime)s  - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S"
         )
         console_handler.setFormatter(console_formatter)
