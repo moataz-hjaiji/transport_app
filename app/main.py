@@ -4,12 +4,14 @@ from app.database.database import engine, Base
 from app.models.user import User
 from app.routes.user import router as user_router
 from app.routes.admin import router as admin_router
+from app.middleware.log_requests import log_requests
 
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.middleware("http")(log_requests)
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
