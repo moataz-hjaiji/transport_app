@@ -33,7 +33,8 @@ def create_driver(driver: DriverCreate, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(driver.password)
     db_user = Driver(
         email=driver.email,
-        username=driver.username,
+        first_name=driver.first_name,
+        last_name=driver.last_name,
         password=hashed_password,
         is_active=driver.is_active
     )
@@ -75,17 +76,12 @@ def update_driver(admin_id: int,data: DriverUpdate,db: Session = Depends(get_db)
     
     return db_driver
 @router.delete("/{admin_id}")
-def delete_driver(admin_id: int,db: Session = Depends(get_db), current_driver: Driver =  admin_only):
+def delete_driver(admin_id: int,db: Session = Depends(get_db)):
     db_driver = db.query(Driver).filter(Driver.id == admin_id).first()
     if not db_driver:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Driver with id {admin_id} not found"
-        )
-    if db_driver.id == current_driver.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot delete your own account"
         )
     db.delete(db_driver)
     db.commit()
@@ -104,7 +100,7 @@ def active_driver(admin_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(driver)
     return driver
-@router.put("/{admin_id}/dsactive",response_model=DriverOut)
+@router.put("/{admin_id}/desactive",response_model=DriverOut)
 def active_driver(admin_id: int, db: Session = Depends(get_db)):
     driver = db.query(Driver).filter(Driver.id == admin_id).first()
     if not driver:

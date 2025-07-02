@@ -57,10 +57,10 @@ def login(user: LoginRequest , db: Session = Depends(get_db)):
     
     return {"access_token": access_token, "token_type": "bearer"}
 def authenticate_user(db: Session, email: str, password: str):
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(Admin).filter(Admin.email == email).first()
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 @router.get("/me", response_model=UserSchema, dependencies=[Depends(JWTBearer())])

@@ -12,21 +12,22 @@ class DriverBase(BaseModel):
     first_name: constr(max_length=100)
     last_name: constr(max_length=100)
     email: EmailStr
+    is_active: bool
 
 class DriverCreate(DriverBase):
     password: constr(min_length=8)  
+    is_active: Optional[bool] = True
 
 class DriverUpdate(BaseModel):
     first_name: Optional[constr(max_length=100)]
     last_name: Optional[constr(max_length=100)]
     email: Optional[EmailStr]
-    status: Optional[DriverStatusEnum]
 
 class DriverOut(DriverBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    status: Optional[DriverStatusEnum]
+    
 
     class Config:
-        orm_mode = True
+        from_attributes = True
