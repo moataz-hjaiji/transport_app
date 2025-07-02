@@ -6,7 +6,9 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-
+class LoginRequest(BaseModel):
+   email: EmailStr 
+   password: str
 class User(UserBase):
     id: int
     is_active: bool
