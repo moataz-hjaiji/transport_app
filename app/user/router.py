@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta
 
 from app.database.database import get_db
-from app.models.admin import Admin
 from app.models.user import User
 from app.schemas.user import UserCreate, User as UserSchema, Token, LoginRequest
 from app.auth.auth_handler import (
@@ -15,8 +14,25 @@ from app.auth.auth_handler import (
 )
 from app.auth.auth_bearer import JWTBearer
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/user/auth", tags=["auth_user"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+@router.post("/signup", response_model=UserSchema)
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_password = get_password_hash(user.password)
+    db_user = User(
+        email=user.email,
+        username=user.username,
+        password=hashed_password
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    return db_user
 
 @router.post("/login", response_model=Token)
 def login(user: LoginRequest , db: Session = Depends(get_db)):
@@ -40,7 +56,7 @@ def login(user: LoginRequest , db: Session = Depends(get_db)):
     
     return {"access_token": access_token, "token_type": "bearer"}
 def authenticate_user(db: Session, email: str, password: str):
-    user = db.query(Admin).filter(Admin.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         return False
     if not verify_password(password, user.password):

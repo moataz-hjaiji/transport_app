@@ -1,3 +1,4 @@
+from sys import prefix
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import engine, Base
@@ -24,9 +25,8 @@ app.add_middleware(
 )
 
 # Include routers
-for router, prefix in all_routers:
-    app.include_router(router, prefix=prefix)
-
+for router in all_routers:
+    app.include_router(router)
 try:
     loop = asyncio.get_running_loop()
     loop.create_task(seeder())

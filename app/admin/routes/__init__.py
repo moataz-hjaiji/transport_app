@@ -6,7 +6,7 @@ from .stations import router as  stations_router
 from .driver import router as driver_router
 
 
-api_router = APIRouter()
+api_router = APIRouter(prefix='/admins')
 
 api_router.include_router(user_router)
 api_router.include_router(admin_router)
