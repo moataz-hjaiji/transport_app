@@ -1,29 +1,26 @@
-import os
-
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.database.database import Base
 
 from alembic import context
-# add your model's MetaData object here for 'autogenerate' support
-# from app.models.station import Station  # or your Base where models are defined
-# target_metadata = Station.metadata
-
+from app.database.database import Base
+from dotenv import load_dotenv
+import os
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-# metadata = MetaData()
-# target_metadata = Base.metadata
-config = context.config
+
+load_dotenv()  # loads variables from .env into environment
+
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB = os.getenv("POSTGRES_DB")
-database_url = os.getenv("DATABASE_URL",f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}")
-if not database_url:
-    raise RuntimeError("DATABASE_URL environment variable not set")
+DATABASE_URL = os.getenv("DATABASE_URL",f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}")
+config = context.config
 
-config.set_main_option('sqlalchemy.url', database_url)
+if DATABASE_URL:
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -31,6 +28,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+# from myapp import mymodel
 target_metadata = Base.metadata
 # target_metadata = None
 
@@ -38,6 +36,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 
 def run_migrations_offline() -> None:

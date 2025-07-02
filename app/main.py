@@ -2,12 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import engine, Base
 from app.helper.seeder import seeder
-from app.models.user import User
-from app.routes.user import router as user_router
-from app.routes.admin import router as admin_router
-from app.routes.stations import router as stations_router
+
 from app.middleware.log_requests import log_requests
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import asyncio
 from app.routes import api_router
 
@@ -39,5 +35,4 @@ except RuntimeError:
 def read_root():
     return {"message": "Welcome to the FastAPI authentication system"}
 
-auth_scheme = HTTPBearer()
 
