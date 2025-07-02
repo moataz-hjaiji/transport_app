@@ -5,13 +5,13 @@ from app.helper.seeder import seeder
 
 from app.middleware.log_requests import log_requests
 import asyncio
-from app.routes import api_router
+from app.router import all_routers
 
 
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(prefix='/api')
 
 app.middleware("http")(log_requests)
 # Add CORS middleware
@@ -24,7 +24,8 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(api_router)
+for router, prefix in all_routers:
+    app.include_router(router, prefix=prefix)
 
 try:
     loop = asyncio.get_running_loop()

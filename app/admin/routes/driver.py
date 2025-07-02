@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 router = APIRouter(
-    prefix="/api/drivers",
+    prefix="/drivers",
     tags=["drivers"],
     dependencies=[admin_only]
 )

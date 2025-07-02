@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 router = APIRouter(
-    prefix="/api/admins",
+    prefix="/admins",
     tags=["admins"],
     dependencies=[admin_only]
 )
