@@ -76,18 +76,18 @@ def update_admin(admin_id: int,data: AdminUpdate,db: Session = Depends(get_db)):
     
     return db_admin
 @router.delete("/{admin_id}")
-def delete_admin(admin_id: int,db: Session = Depends(get_db)):
+def delete_admin(admin_id: int,db: Session = Depends(get_db), current_admin: Admin =  admin_only):
     db_admin = db.query(Admin).filter(Admin.id == admin_id).first()
     if not db_admin:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Admin with id {admin_id} not found"
         )
-    # if db_admin.id == current_admin.id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Cannot delete your own account"
-    #     )
+    if db_admin.id == current_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete your own account"
+        )
     db.delete(db_admin)
     db.commit()
     return None

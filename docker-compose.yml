@@ -18,7 +18,8 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:13-alpine
+    image: postgis/postgis:13-3.3
+    platform: linux/amd64
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

@@ -13,4 +13,5 @@ pydantic[email]>=1.10.7
 python-jose[cryptography] 
 passlib[bcrypt]    
 geoalchemy2 
-psycopg2-binary      
+psycopg2-binary     
+shapely 

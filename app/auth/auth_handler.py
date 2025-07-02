@@ -10,6 +10,11 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.schemas.token import TokenData
+from app.models.admin import Admin
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+auth_scheme = HTTPBearer()
+
 
 load_dotenv()
 
@@ -51,15 +56,8 @@ def decode_token(token: str) -> TokenData:
     
     try:
         # Decode with security checks
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-            options={
-                "verify_signature": True,
-                "require_exp": True,
-            }
-        )
+        payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+
 
         print("sub : ",sub)
 
@@ -84,21 +82,23 @@ def decode_token(token: str) -> TokenData:
                 detail="Token expired",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
-async def get_current_admin(db: Session = Depends(get_db),token: str = Depends(oauth2_scheme)):
+async def get_current_admin(db: Session = Depends(get_db),token: HTTPAuthorizationCredentials = Depends(auth_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
+        print('id',payload.get('id'))
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     
     db_user = db.query(Admin).filter(Admin.id == payload.get('id')).first()
+    print('admin ', db_user)
     if db_user is None:
         raise credentials_exception
     
