@@ -15,7 +15,7 @@ from app.auth.auth_handler import (
 )
 from app.auth.auth_bearer import JWTBearer
 
-router = APIRouter()
+router = APIRouter(prefix="/api/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 @router.post("/signup", response_model=UserSchema)

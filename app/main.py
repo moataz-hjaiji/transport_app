@@ -9,6 +9,8 @@ from app.routes.stations import router as stations_router
 from app.middleware.log_requests import log_requests
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import asyncio
+from app.routes import api_router
+
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -26,16 +28,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(user_router, prefix="/api/auth", tags=["auth"])
-app.include_router(admin_router)
-app.include_router(stations_router)
+app.include_router(api_router)
 
 try:
     loop = asyncio.get_running_loop()
-    # If already in an event loop, create a task
     loop.create_task(seeder())
 except RuntimeError:
-    # If not in an event loop, run normally
     asyncio.run(seeder())
 @app.get("/")
 def read_root():
