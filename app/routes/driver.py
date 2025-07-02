@@ -104,7 +104,7 @@ def active_driver(admin_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(driver)
     return driver
-@router.put("/{admin_id}/desactive",response_model=DriverOut)
+@router.put("/{admin_id}/dsactive",response_model=DriverOut)
 def active_driver(admin_id: int, db: Session = Depends(get_db)):
     driver = db.query(Driver).filter(Driver.id == admin_id).first()
     if not driver:
